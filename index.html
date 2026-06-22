@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="피트니스">
+<title>퍼포먼스 트래커</title>
+<style>
+  :root {
+    --bg: #0f0f13; --surface: #1a1a22; --surface2: #22222e; --border: #2e2e3e;
+    --accent: #6c63ff; --accent2: #ff6584; --green: #43d9a0; --yellow: #ffd166;
+    --text: #e8e8f0; --text2: #888899; --tab-h: 60px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  .header { padding: 14px 16px 10px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-top: env(safe-area-inset-top, 14px); }
+  .content { flex: 1; overflow-y: auto; padding: 14px 14px 0; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; }
+  input, select, textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 11px; font-size: 14px; outline: none; font-family: inherit; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: none; height: 70px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .form-group { margin-bottom: 10px; }
+  .btn { border: none; border-radius: 10px; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 4px; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-notion { background: #2a2a36; border: 1px solid var(--accent); color: var(--accent); margin-top: 8px; }
+  .set-row { display: flex; align-items: center; gap: 6px; background: var(--surface2); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; }
+  .set-row input { background: var(--bg); width: 60px; flex: none; text-align: center; padding: 6px 4px; }
+  .set-row span { font-size: 12px; color: var(--text2); }
+  .set-row .del { background: none; border: none; color: var(--accent2); font-size: 16px; cursor: pointer; padding: 0 4px; margin-left: auto; }
+  .pr-badge { background: var(--yellow); color: #000; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 20px; margin-left: 6px; }
+  .rpe-wrap { display: flex; align-items: center; gap: 10px; }
+  .rpe-wrap input[type=range] { flex: 1; accent-color: var(--accent); }
+  .history-item { border-bottom: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .history-item:last-child { border-bottom: none; }
+  .hi-left .hi-name { font-weight: 700; font-size: 14px; }
+  .hi-left .hi-detail { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .hi-right { text-align: right; font-size: 12px; color: var(--text2); }
+  .hi-right .hi-weight { font-size: 16px; font-weight: 800; color: var(--text); }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .stat-box { background: var(--surface2); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-box .val { font-size: 24px; font-weight: 800; color: var(--accent); }
+  .stat-box .lbl { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .chart-wrap { width: 100%; overflow-x: auto; }
+  canvas { display: block; }
+  .tabs { display: flex; background: var(--surface); border-top: 1px solid var(--border); height: var(--tab-h); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: var(--text2); font-size: 10px; border: none; background: none; transition: color .2s; }
+  .tab.active { color: var(--accent); }
+  .tab svg { width: 22px; height: 22px; }
+  .chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; }
+  .chip.active { border-color: var(--accent); background: rgba(108,99,255,.15); color: var(--accent); }
+  .wod-item { border-bottom: 1px solid var(--border); padding: 10px 0; }
+  .wod-item:last-child { border-bottom: none; }
+  .wod-name { font-weight: 700; }
+  .wod-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .rpe-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .scale-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 700; }
+  .rx { background: rgba(67,217,160,.15); color: var(--green); }
+  .scaled { background: rgba(255,209,102,.15); color: var(--yellow); }
+  .empty { text-align: center; color: var(--text2); padding: 30px; font-size: 13px; }
+  .section-label { font-size: 12px; color: var(--text2); font-weight: 700; margin: 14px 0 8px; text-transform: uppercase; letter-spacing: .4px; }
+  .add-ex-btn { background: var(--surface2); border: 1px dashed var(--border); color: var(--text2); border-radius: 8px; padding: 8px; width: 100%; cursor: pointer; font-size: 13px; margin-bottom: 10px; }
+  .sync-status { font-size: 11px; text-align: center; margin-top: 6px; min-height: 16px; }
+  .sync-ok { color: var(--green); }
+  .sync-err { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div style="font-size:17px;font-weight:700;">🏋️ 퍼포먼스 트래커</div>
+    <div style="font-size:12px;color:var(--text2)" id="headerDate"></div>
+  </div>
+  <div style="font-size:11px;color:var(--text2);text-align:right">
+    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px;vertical-align:middle"></span>로컬 저장
+  </div>
+</div>
+
+<div class="content" id="content">
+
+  <!-- 개인운동 -->
+  <div class="tab-panel active" id="panel-lift">
+    <div class="card">
+      <div class="card-title">운동 추가</div>
+      <div class="form-group">
+        <label>종목</label>
+        <select id="liftExercise" onchange="document.getElementById('customExWrap').style.display=this.value==='직접 입력'?'block':'none'">
+          <option>데드리프트</option><option>백스쿼트</option><option>단팔 덤벨 로우</option>
+          <option>바벨 언더그립 벤트오버 로우</option><option>불가리안 스플릿스쿼트</option>
+          <option>랜드마인 프레스</option><option>바벨 힙쓰러스트</option><option>스캡풀업</option>
+          <option>스트릭트 풀업</option><option>TGU</option><option>정규 푸쉬업</option>
+          <option>링 페이스풀</option><option>OHP</option><option>KB 스윙</option><option>직접 입력</option>
+        </select>
+      </div>
+      <div class="form-group" id="customExWrap" style="display:none">
+        <label>직접 입력</label>
+        <input type="text" id="customEx" placeholder="종목명">
+      </div>
+      <div id="setsContainer"></div>
+      <button class="add-ex-btn" onclick="addSetRow()">+ 다른 무게로 추가</button>
+      <button class="btn btn-primary" onclick="saveExercise()">저장</button>
+    </div>
+
+    <div class="section-label">오늘 기록</div>
+    <div class="card" id="todayLiftList"><div class="empty">아직 기록 없음</div></div>
+
+    <div style="padding: 0 0 4px">
+      <button class="btn btn-notion" onclick="copyForClipboard()">📋 오늘 일지 복사</button>
+      <div class="sync-status" id="syncStatus"></div>
+    </div>
+
+    <div class="section-label">PR 현황</div>
+    <div class="card" id="prList"><div class="empty">데이터 없음</div></div>
+  </div>
+
+  <!-- WOD -->
+  <div class="tab-panel" id="panel-wod">
+    <div class="card">
+      <div class="card-title">WOD 기록</div>
+      <div class="form-group">
+        <label>WOD 이름</label>
+        <input type="text" id="wodName" placeholder="예: Cindy, 오늘의 와드">
+      </div>
+      <div class="form-group">
+        <label>타입</label>
+        <div class="chip-group" id="wodTypeChips">
+          <div class="chip active" onclick="selectChip('wodTypeChips',this,'wodType','For Time')">For Time</div>
+          <div class="chip" onclick="selectChip('wodTypeChips',this,'wodType','AMRAP')">AMRAP</div>
+          <div class="chip" onclick="selectChip('wodTypeChips',this,'wodType','EMOM')">EMOM</div>
+          <div class="chip" onclick="selectChip('wodTypeChips',this,'wodType','기타')">기타</div>
+        </div>
+      </div>
+      <div class="row form-group">
+        <div><label>완료 시간 (mm:ss)</label><input type="text" id="wodTime" placeholder="12:30"></div>
+        <div><label>라운드 수</label><input type="number" id="wodRounds" placeholder="5"></div>
+      </div>
+      <div class="form-group">
+        <label>스케일링</label>
+        <div class="chip-group" id="wodScaleChips">
+          <div class="chip active" onclick="selectChip('wodScaleChips',this,'wodScale','RX')">RX</div>
+          <div class="chip" onclick="selectChip('wodScaleChips',this,'wodScale','스케일')">스케일</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>RPE <span id="rpeDisplay" style="color:var(--accent);font-weight:700">7</span></label>
+        <div class="rpe-wrap">
+          <span style="font-size:11px;color:var(--text2)">1</span>
+          <input type="range" min="1" max="10" value="7" id="rpeSlider" oninput="document.getElementById('rpeDisplay').textContent=this.value">
+          <span style="font-size:11px;color:var(--text2)">10</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>동작 내역 / 메모</label>
+        <textarea id="wodMemo" placeholder="토투바 → Knee to Chest 스케일&#10;Box Jump Over 20회 등"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="saveWod()">저장</button>
+    </div>
+    <div class="section-label">WOD 히스토리</div>
+    <div class="card" id="wodHistory"><div class="empty">아직 기록 없음</div></div>
+  </div>
+
+  <!-- 통계 -->
+  <div class="tab-panel" id="panel-stats">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="val" id="statTotalSessions">0</div><div class="lbl">총 운동 일수</div></div>
+      <div class="stat-box"><div class="val" id="statWodCount">0</div><div class="lbl">WOD 횟수</div></div>
+      <div class="stat-box"><div class="val" id="statAvgRpe">-</div><div class="lbl">평균 RPE</div></div>
+      <div class="stat-box"><div class="val" id="statPrCount">0</div><div class="lbl">PR 갱신</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">종목별 최고 중량</div>
+      <div class="form-group">
+        <select id="chartExercise" onchange="drawLiftChart()"><option value="">종목 선택</option></select>
+      </div>
+      <div class="chart-wrap"><canvas id="liftChart" height="160"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">주간 볼륨 (lbs)</div>
+      <div class="chart-wrap"><canvas id="volumeChart" height="140"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">WOD RPE 추이</div>
+      <div class="chart-wrap"><canvas id="rpeChart" height="120"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('lift',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M2 8h4M18 8h4M2 16h4M18 16h4"/></svg>개인운동
+  </button>
+  <button class="tab" onclick="switchTab('wod',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>WOD
+  </button>
+  <button class="tab" onclick="switchTab('stats',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>통계
+  </button>
+</div>
+
+<script>
+let state = { lifts: [], wods: [], prs: {} };
+let sets = [];
+let wodType = 'For Time', wodScale = 'RX';
+
+// localStorage 사용 (GitHub Pages에서는 가능)
+function loadState() {
+  try {
+    const s = localStorage.getItem('fitness_tracker_v1');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+function save() {
+  try { localStorage.setItem('fitness_tracker_v1', JSON.stringify(state)); } catch(e) {}
+}
+
+loadState();
+renderAll();
+
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmt(d) { const dt = new Date(d); return `${dt.getMonth()+1}/${dt.getDate()}`; }
+function todayKo() {
+  return new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+}
+document.getElementById('headerDate').textContent = todayKo();
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
+  if (name==='stats') { updateStats(); setTimeout(drawAllCharts,50); }
+}
+
+function selectChip(gid, el, v, val) {
+  document.querySelectorAll('#'+gid+' .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if (v==='wodType') wodType=val;
+  if (v==='wodScale') wodScale=val;
+}
+
+function addSetRow() { sets.push({sets:'',weight:'',reps:''}); renderSets(); }
+function renderSets() {
+  document.getElementById('setsContainer').innerHTML = sets.map((s,i)=>`
+    <div class="set-row">
+      <input type="number" placeholder="세트" value="${s.sets}" oninput="sets[${i}].sets=this.value" style="width:52px;text-align:center">
+      <span>×</span>
+      <input type="number" placeholder="lbs" value="${s.weight}" oninput="sets[${i}].weight=this.value" style="width:62px;text-align:center">
+      <span>×</span>
+      <input type="number" placeholder="rep" value="${s.reps}" oninput="sets[${i}].reps=this.value" style="width:52px;text-align:center">
+      <button class="del" onclick="removeSet(${i})">×</button>
+    </div>`).join('');
+}
+function removeSet(i) { sets.splice(i,1); renderSets(); }
+addSetRow();
+
+function saveExercise() {
+  const sel = document.getElementById('liftExercise');
+  const ex = sel.value==='직접 입력' ? document.getElementById('customEx').value.trim() : sel.value;
+  if (!ex) return alert('종목을 입력해주세요');
+  const valid = sets.filter(s=>s.sets&&s.weight&&s.reps);
+  if (!valid.length) return alert('세트를 하나 이상 입력해주세요');
+  const maxW = Math.max(...valid.map(s=>+s.weight));
+  const isPR = !state.prs[ex] || maxW > state.prs[ex];
+  if (isPR) state.prs[ex] = maxW;
+  const expanded = valid.flatMap(s=>Array(+s.sets).fill({weight:+s.weight,reps:+s.reps}));
+  state.lifts.push({ date:today(), exercise:ex, sets:expanded, isPR, summary:valid.map(s=>`${s.sets}×${s.weight}lbs×${s.reps}`).join(' / ') });
+  save(); sets=[]; addSetRow();
+  renderTodayLifts(); renderPRList();
+  if (isPR) showToast(`🏆 PR 갱신! ${ex} ${maxW}lbs`);
+  else showToast('저장 완료!');
+}
+
+function deleteLift(idx) {
+  const l = state.lifts[idx];
+  if (l.isPR) {
+    const ex = l.exercise;
+    state.lifts.splice(idx,1);
+    const rem = state.lifts.filter(x=>x.exercise===ex);
+    if (rem.length) state.prs[ex] = Math.max(...rem.map(x=>Math.max(...x.sets.map(s=>s.weight))));
+    else delete state.prs[ex];
+  } else { state.lifts.splice(idx,1); }
+  save(); renderTodayLifts(); renderPRList();
+}
+
+function renderTodayLifts() {
+  const t = today();
+  const items = state.lifts.filter(l=>l.date===t);
+  const el = document.getElementById('todayLiftList');
+  if (!items.length) { el.innerHTML='<div class="empty">아직 기록 없음</div>'; return; }
+  el.innerHTML = items.map((l,i)=>`
+    <div class="history-item">
+      <div class="hi-left">
+        <div class="hi-name">${l.exercise}${l.isPR?'<span class="pr-badge">PR</span>':''}</div>
+        <div class="hi-detail">${l.summary||l.sets.map((s,j)=>`${j+1}세트 ${s.weight}lbs×${s.reps}`).join(' · ')}</div>
+      </div>
+      <div class="hi-right">
+        <div class="hi-weight">${Math.max(...l.sets.map(s=>s.weight))}lbs</div>
+        <button onclick="deleteLift(${state.lifts.indexOf(l)})" style="background:none;border:none;color:var(--accent2);font-size:11px;cursor:pointer;margin-top:4px;">삭제</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderPRList() {
+  const el = document.getElementById('prList');
+  const keys = Object.keys(state.prs);
+  if (!keys.length) { el.innerHTML='<div class="empty">데이터 없음</div>'; return; }
+  el.innerHTML = keys.map(k=>`
+    <div class="history-item">
+      <div class="hi-left"><div class="hi-name">${k}</div></div>
+      <div class="hi-right"><div class="hi-weight">${state.prs[k]}lbs</div></div>
+    </div>`).join('');
+}
+
+function copyForClipboard() {
+  const t = today();
+  const todayLifts = state.lifts.filter(l => l.date === t);
+  const todayWods = state.wods.filter(w => w.date === t);
+  if (!todayLifts.length && !todayWods.length) { showToast('저장할 기록이 없어요'); return; }
+  const dateTitle = new Date().toLocaleDateString('ko-KR');
+  let lines = [`[운동 일지] ${dateTitle}\n`];
+  if (todayLifts.length) {
+    lines.push('## 💪 개인운동');
+    todayLifts.forEach(l => {
+      const maxW = Math.max(...l.sets.map(s => s.weight));
+      lines.push(`- ${l.exercise} | ${l.summary||''} | 최고 ${maxW}lbs${l.isPR ? ' 🏆PR' : ''}`);
+    });
+  }
+  if (todayWods.length) {
+    lines.push('\n## 🔥 WOD');
+    todayWods.forEach(w => {
+      lines.push(`- ${w.name} | ${w.type}${w.time?' | ⏱'+w.time:''}${w.rounds?' | 🔄'+w.rounds+'라운드':''} | ${w.scale} | RPE ${w.rpe}${w.memo?'\n  '+w.memo:''}`);
+    });
+  }
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('syncStatus').innerHTML = '<span class="sync-ok">✅ 클립보드에 복사됐어요!</span>';
+    showToast('📋 복사 완료!');
+  }).catch(() => {
+    document.getElementById('syncStatus').innerHTML = `<textarea style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;height:100px;margin-top:6px">${text}</textarea>`;
+  });
+}
+
+function saveWod() {
+  const name = document.getElementById('wodName').value.trim();
+  if (!name) return alert('WOD 이름을 입력해주세요');
+  state.wods.push({
+    date:today(), name, type:wodType,
+    time: document.getElementById('wodTime').value,
+    rounds: document.getElementById('wodRounds').value,
+    scale: wodScale,
+    rpe: +document.getElementById('rpeSlider').value,
+    memo: document.getElementById('wodMemo').value.trim()
+  });
+  save();
+  ['wodName','wodTime','wodRounds','wodMemo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('rpeSlider').value=7;
+  document.getElementById('rpeDisplay').textContent=7;
+  renderWodHistory();
+  showToast('WOD 저장 완료!');
+}
+
+function rpeColor(v) { return v<=4?'#43d9a0':v<=7?'#ffd166':'#ff6584'; }
+
+function renderWodHistory() {
+  const el = document.getElementById('wodHistory');
+  const sorted = [...state.wods].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+  if (!sorted.length) { el.innerHTML='<div class="empty">아직 기록 없음</div>'; return; }
+  el.innerHTML = sorted.map(w=>`
+    <div class="wod-item">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="wod-name">${w.name}</span>
+        <span class="scale-badge ${w.scale==='RX'?'rx':'scaled'}">${w.scale}</span>
+      </div>
+      <div class="wod-meta">
+        ${fmt(w.date)} · ${w.type}
+        ${w.time?'· ⏱'+w.time:''}
+        ${w.rounds?'· 🔄'+w.rounds+'라운드':''}
+        · <span class="rpe-dot" style="background:${rpeColor(w.rpe)}"></span>RPE ${w.rpe}
+      </div>
+      ${w.memo?`<div class="wod-meta" style="margin-top:4px;color:var(--text)">${w.memo.split('\n')[0]}</div>`:''}
+    </div>`).join('');
+}
+
+function updateStats() {
+  const days = new Set([...state.lifts.map(l=>l.date),...state.wods.map(w=>w.date)]).size;
+  document.getElementById('statTotalSessions').textContent=days;
+  document.getElementById('statWodCount').textContent=state.wods.length;
+  document.getElementById('statAvgRpe').textContent=state.wods.length
+    ?(state.wods.reduce((a,w)=>a+w.rpe,0)/state.wods.length).toFixed(1):'-';
+  document.getElementById('statPrCount').textContent=state.lifts.filter(l=>l.isPR).length;
+  const sel=document.getElementById('chartExercise');
+  const exs=[...new Set(state.lifts.map(l=>l.exercise))];
+  sel.innerHTML='<option value="">종목 선택</option>'+exs.map(e=>`<option>${e}</option>`).join('');
+}
+
+function drawAllCharts() { drawLiftChart(); drawVolumeChart(); drawRpeChart(); }
+
+function drawLiftChart() {
+  const ex=document.getElementById('chartExercise').value;
+  const canvas=document.getElementById('liftChart');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.parentElement.clientWidth-2;
+  canvas.width=W; canvas.height=160; ctx.clearRect(0,0,W,160);
+  const data=state.lifts.filter(l=>l.exercise===ex)
+    .map(l=>({date:l.date,max:Math.max(...l.sets.map(s=>s.weight))}))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  if (!ex||data.length<1) {
+    ctx.fillStyle='#888899';ctx.font='13px sans-serif';ctx.textAlign='center';
+    ctx.fillText('종목을 선택하세요',W/2,80);return;
+  }
+  drawLine(ctx,W,160,data.map(d=>fmt(d.date)),data.map(d=>d.max),'#6c63ff');
+}
+
+function drawVolumeChart() {
+  const canvas=document.getElementById('volumeChart');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.parentElement.clientWidth-2;
+  canvas.width=W;canvas.height=140;ctx.clearRect(0,0,W,140);
+  const wv={};
+  state.lifts.forEach(l=>{
+    const d=new Date(l.date),mon=new Date(d);
+    mon.setDate(d.getDate()-d.getDay()+1);
+    const wk=mon.toISOString().split('T')[0];
+    wv[wk]=(wv[wk]||0)+l.sets.reduce((a,s)=>a+s.weight*s.reps,0);
+  });
+  const labels=Object.keys(wv).sort().slice(-8);
+  if (!labels.length){ctx.fillStyle='#888899';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('데이터 없음',W/2,70);return;}
+  drawBar(ctx,W,140,labels.map(l=>l.slice(5)),labels.map(k=>wv[k]),'#43d9a0');
+}
+
+function drawRpeChart() {
+  const canvas=document.getElementById('rpeChart');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.parentElement.clientWidth-2;
+  canvas.width=W;canvas.height=120;ctx.clearRect(0,0,W,120);
+  const data=[...state.wods].sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);
+  if (!data.length){ctx.fillStyle='#888899';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('WOD 데이터 없음',W/2,60);return;}
+  drawLine(ctx,W,120,data.map(d=>fmt(d.date)),data.map(d=>d.rpe),'#ff6584','',1,10);
+}
+
+function drawLine(ctx,W,H,labels,vals,color,unit,minY,maxY){
+  const pad={t:14,r:10,b:28,l:38};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const mn=minY!==undefined?minY:Math.max(0,Math.min(...vals)*0.9);
+  const mx=maxY!==undefined?maxY:Math.max(...vals)*1.05||1;
+  const sy=v=>pad.t+cH-((v-mn)/(mx-mn||1))*cH;
+  const sx=i=>pad.l+(i/(labels.length-1||1))*cW;
+  ctx.strokeStyle='#2e2e3e';ctx.lineWidth=1;
+  [0,.25,.5,.75,1].forEach(t=>{
+    const y=pad.t+t*cH;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#888899';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText(Math.round(mn+(1-t)*(mx-mn)),pad.l-4,y+3);
+  });
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  grad.addColorStop(0,color+'44');grad.addColorStop(1,color+'00');
+  ctx.beginPath();
+  vals.forEach((v,i)=>i===0?ctx.moveTo(sx(i),sy(v)):ctx.lineTo(sx(i),sy(v)));
+  ctx.lineTo(sx(vals.length-1),pad.t+cH);ctx.lineTo(sx(0),pad.t+cH);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';
+  ctx.beginPath();
+  vals.forEach((v,i)=>i===0?ctx.moveTo(sx(i),sy(v)):ctx.lineTo(sx(i),sy(v)));
+  ctx.stroke();
+  vals.forEach((v,i)=>{
+    ctx.fillStyle=color;ctx.beginPath();ctx.arc(sx(i),sy(v),3.5,0,Math.PI*2);ctx.fill();
+    if(i%Math.ceil(labels.length/6)===0||i===labels.length-1){
+      ctx.fillStyle='#888899';ctx.font='9px sans-serif';ctx.textAlign='center';
+      ctx.fillText(labels[i],sx(i),H-6);
+    }
+  });
+}
+
+function drawBar(ctx,W,H,labels,vals,color){
+  const pad={t:14,r:10,b:28,l:44};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const mx=Math.max(...vals)*1.1||1;
+  const bW=cW/labels.length*0.6,bGap=cW/labels.length;
+  ctx.strokeStyle='#2e2e3e';ctx.lineWidth=1;
+  [0,.5,1].forEach(t=>{
+    const y=pad.t+t*cH;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#888899';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText(Math.round((1-t)*mx),pad.l-4,y+3);
+  });
+  vals.forEach((v,i)=>{
+    const x=pad.l+i*bGap+bGap/2-bW/2,bH=(v/mx)*cH,y=pad.t+cH-bH;
+    const g=ctx.createLinearGradient(0,y,0,y+bH);
+    g.addColorStop(0,color);g.addColorStop(1,color+'66');
+    ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x,y,bW,bH,3);ctx.fill();
+    ctx.fillStyle='#888899';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(labels[i],x+bW/2,H-6);
+  });
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;white-space:nowrap;max-width:90vw;text-align:center';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+function renderAll(){renderTodayLifts();renderPRList();renderWodHistory();}
+</script>
+</body>
+</html>
