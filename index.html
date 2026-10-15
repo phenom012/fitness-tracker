@@ -105,6 +105,8 @@
   .v-none { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
   .neuro-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 12px; color: var(--text2); }
   .neuro-row input { width: 20px; height: 20px; flex: none; padding: 0; accent-color: var(--accent2); }
+  .sticky-save { position: sticky; bottom: 0; z-index: 5; padding: 10px 0 8px; background: linear-gradient(to top, var(--bg) 70%, rgba(15,15,19,0)); }
+  .sticky-save .btn { margin-top: 0; box-shadow: 0 4px 16px rgba(0,0,0,.45); }
   .sym-hist { border-bottom: 1px solid var(--border); padding: 9px 0; font-size: 12px; }
   .sym-hist:last-child { border-bottom: none; }
   .sym-hist .sh-date { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
@@ -133,6 +135,7 @@
       <div class="today-title" id="todayTitle"></div>
       <div class="today-sub" id="todaySub"></div>
       <div id="todayProgress" class="today-sub" style="margin-top:6px"></div>
+      <div id="autosaveStatus" class="today-sub" style="margin-top:2px"></div>
     </div>
     <div class="card"><div class="card-title">오늘 할 일</div><div id="todayItems"></div></div>
     <div id="todayRules"></div>
@@ -164,7 +167,7 @@
         <textarea id="sym_note" placeholder="예: 벤치 하강 중간 지점에서 앞쪽 찝힘"></textarea>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="saveSymptoms()">저장</button>
+    <div class="sticky-save"><button class="btn btn-primary" onclick="saveSymptoms()">💾 증상 저장</button></div>
     <div class="card" style="margin-top:12px">
       <div class="card-title">판정 규칙</div>
       <ul class="rule-list">
@@ -183,19 +186,13 @@
       <div class="card-title">운동 추가 (kg)</div>
       <div class="form-group">
         <label>종목</label>
-        <select id="liftExercise" onchange="document.getElementById('customExWrap').style.display=this.value==='직접 입력'?'block':'none'">
-          <option>데드리프트</option><option>백스쿼트</option><option>단팔 덤벨 로우</option>
-          <option>바벨 언더그립 벤트오버 로우</option><option>불가리안 스플릿스쿼트</option>
-          <option>랜드마인 프레스</option><option>바벨 힙쓰러스트</option><option>스캡풀업</option>
-          <option>스트릭트 풀업</option><option>TGU</option><option>정규 푸쉬업</option>
-          <option>링 페이스풀</option><option>OHP</option><option>KB 스윙</option>
-          <option>백팩 RDL</option><option>시티드 로우 머신</option><option>스캡션</option><option>직접 입력</option>
-        </select>
+        <select id="liftExercise" onchange="document.getElementById('customExWrap').style.display=this.value===CUSTOM_OPT?'block':'none'"></select>
       </div>
       <div class="form-group" id="customExWrap" style="display:none">
-        <label>직접 입력</label>
+        <label>직접 입력 (저장하면 다음부터 목록에 자동 추가)</label>
         <input type="text" id="customEx" placeholder="종목명">
       </div>
+      <div class="today-sub" style="margin-bottom:8px">맨몸·밴드 운동은 무게에 0을 입력하세요.</div>
       <div id="setsContainer"></div>
       <button class="add-ex-btn" onclick="addSetRow()">+ 다른 무게로 추가</button>
       <button class="btn btn-primary" onclick="saveExercise()">저장</button>
@@ -508,12 +505,18 @@ function sessionOf(date) {
   if (!state.sessions[date]) state.sessions[date] = { checks: {}, notes: {} };
   return state.sessions[date];
 }
+let lastAutoSave = '';
+function markSaved() {
+  lastAutoSave = new Date().toTimeString().slice(0, 5);
+  const el = document.getElementById('autosaveStatus');
+  if (el) el.innerHTML = `<span class="sync-ok">✔ 자동 저장됨 ${lastAutoSave}</span>`;
+}
 function toggleCheck(id) {
   const s = sessionOf(today());
   s.checks[id] = !s.checks[id];
-  save(); renderToday();
+  save(); renderToday(); markSaved();
 }
-function setNote(id, v) { sessionOf(today()).notes[id] = v; save(); }
+function setNote(id, v) { sessionOf(today()).notes[id] = v; save(); markSaved(); }
 
 function daysSincePhase(d) { return Math.floor((parseDate(d) - parseDate(PHASE_START)) / 86400000); }
 
@@ -552,6 +555,8 @@ function renderToday() {
   const items = plan.items || [];
   const done = items.filter(it => sess.checks[it.id]).length;
   document.getElementById('todayProgress').textContent = items.length ? `진행 ${done}/${items.length}` : '';
+  document.getElementById('autosaveStatus').innerHTML = !items.length ? ''
+    : lastAutoSave ? `<span class="sync-ok">✔ 자동 저장됨 ${lastAutoSave}</span>` : '체크하면 자동 저장됩니다 (저장 버튼 없음)';
 
   const box = document.getElementById('todayItems');
   if (!items.length) box.innerHTML = '<div class="empty">오늘은 완전 휴식입니다 😌</div>';
@@ -678,6 +683,26 @@ function renderSymHistory() {
 let sets = [];
 let wodType = 'For Time', wodScale = 'RX';
 
+const CUSTOM_OPT = '직접 입력';
+const DEFAULT_EXERCISES = [
+  '데드리프트', '백스쿼트', '단팔 덤벨 로우', '바벨 언더그립 벤트오버 로우', '불가리안 스플릿스쿼트',
+  '랜드마인 프레스', '바벨 힙쓰러스트', '스캡풀업', '스트릭트 풀업', 'TGU', '정규 푸쉬업',
+  '링 페이스풀', 'OHP', 'KB 스윙', '백팩 RDL', '시티드 로우 머신', '스캡션',
+  '밴드 로우', '밴드 외회전', '글루트브리지', '인클라인 푸쉬업'
+];
+// 기본 목록 + 지금까지 직접 입력해 저장한 종목(기록에서 자동 수집)
+function exerciseList() {
+  const custom = [...new Set(state.lifts.map(l => l.exercise))].filter(n => !DEFAULT_EXERCISES.includes(n) && n !== CUSTOM_OPT);
+  return [...DEFAULT_EXERCISES, ...custom];
+}
+function renderExerciseOptions(selected) {
+  const sel = document.getElementById('liftExercise');
+  const keep = selected || sel.value;
+  sel.innerHTML = exerciseList().map(n => `<option>${esc(n)}</option>`).join('') + `<option>${CUSTOM_OPT}</option>`;
+  if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+  document.getElementById('customExWrap').style.display = sel.value === CUSTOM_OPT ? 'block' : 'none';
+}
+
 function selectChip(gid, el, v, val) {
   document.querySelectorAll('#' + gid + ' .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -700,8 +725,8 @@ function removeSet(i) { sets.splice(i, 1); renderSets(); }
 
 function saveExercise() {
   const sel = document.getElementById('liftExercise');
-  const ex = sel.value === '직접 입력' ? document.getElementById('customEx').value.trim() : sel.value;
-  if (!ex) return alert('종목을 입력해주세요');
+  const ex = sel.value === CUSTOM_OPT ? document.getElementById('customEx').value.trim() : sel.value;
+  if (!ex || ex === CUSTOM_OPT) return alert('종목을 입력해주세요');
   const valid = sets.filter(s => s.sets && s.weight !== '' && s.reps);
   if (!valid.length) return alert('세트를 하나 이상 입력해주세요 (맨몸/밴드는 무게 0)');
   const maxW = Math.max(...valid.map(s => +s.weight));
@@ -710,6 +735,8 @@ function saveExercise() {
   const expanded = valid.flatMap(s => Array(+s.sets).fill({ weight: +s.weight, reps: +s.reps }));
   state.lifts.push({ date: today(), exercise: ex, sets: expanded, isPR, summary: valid.map(s => `${s.sets}×${s.weight}kg×${s.reps}`).join(' / ') });
   save(); sets = []; addSetRow();
+  document.getElementById('customEx').value = '';
+  renderExerciseOptions(ex);
   renderTodayLifts(); renderPRList();
   showToast(isPR ? `🏆 PR 갱신! ${ex} ${maxW}kg` : '저장 완료!');
 }
@@ -723,7 +750,7 @@ function deleteLift(idx) {
     if (rem.length) state.prs[ex] = Math.max(...rem.map(x => Math.max(...x.sets.map(s => s.weight))));
     else delete state.prs[ex];
   }
-  save(); renderTodayLifts(); renderPRList();
+  save(); renderExerciseOptions(); renderTodayLifts(); renderPRList();
 }
 function renderTodayLifts() {
   const t = today();
@@ -1033,7 +1060,7 @@ function showToast(msg) {
    초기화
    ============================================================ */
 function renderAll() {
-  renderToday(); renderTodayLifts(); renderPRList(); renderWodHistory(); renderSymHistory();
+  renderExerciseOptions(); renderToday(); renderTodayLifts(); renderPRList(); renderWodHistory(); renderSymHistory();
 }
 loadState();
 document.getElementById('headerDate').textContent = todayKo();
