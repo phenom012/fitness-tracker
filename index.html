@@ -105,6 +105,8 @@
   .v-none { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
   .neuro-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 12px; color: var(--text2); }
   .neuro-row input { width: 20px; height: 20px; flex: none; padding: 0; accent-color: var(--accent2); }
+  .sticky-save { position: sticky; bottom: 0; z-index: 5; padding: 10px 0 8px; background: linear-gradient(to top, var(--bg) 70%, rgba(15,15,19,0)); }
+  .sticky-save .btn { margin-top: 0; box-shadow: 0 4px 16px rgba(0,0,0,.45); }
   .sym-hist { border-bottom: 1px solid var(--border); padding: 9px 0; font-size: 12px; }
   .sym-hist:last-child { border-bottom: none; }
   .sym-hist .sh-date { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
@@ -164,7 +166,7 @@
         <textarea id="sym_note" placeholder="예: 벤치 하강 중간 지점에서 앞쪽 찝힘"></textarea>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="saveSymptoms()">저장</button>
+    <div class="sticky-save"><button class="btn btn-primary" onclick="saveSymptoms()">💾 증상 저장</button></div>
     <div class="card" style="margin-top:12px">
       <div class="card-title">판정 규칙</div>
       <ul class="rule-list">
