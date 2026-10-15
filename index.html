@@ -17,7 +17,7 @@
   body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
   .header { padding: 14px 16px 10px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-top: env(safe-area-inset-top, 14px); }
   .content { flex: 1; overflow-y: auto; padding: 14px 14px 0; }
-  .tab-panel { display: none; }
+  .tab-panel { display: none; padding-bottom: 20px; }
   .tab-panel.active { display: block; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
   .card-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
@@ -31,13 +31,14 @@
   .btn { border: none; border-radius: 10px; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 4px; }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-notion { background: #2a2a36; border: 1px solid var(--accent); color: var(--accent); margin-top: 8px; }
+  .btn-ghost { background: var(--surface2); border: 1px solid var(--border); color: var(--text); margin-top: 8px; }
   .set-row { display: flex; align-items: center; gap: 6px; background: var(--surface2); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; }
   .set-row input { background: var(--bg); width: 60px; flex: none; text-align: center; padding: 6px 4px; }
   .set-row span { font-size: 12px; color: var(--text2); }
   .set-row .del { background: none; border: none; color: var(--accent2); font-size: 16px; cursor: pointer; padding: 0 4px; margin-left: auto; }
   .pr-badge { background: var(--yellow); color: #000; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 20px; margin-left: 6px; }
   .rpe-wrap { display: flex; align-items: center; gap: 10px; }
-  .rpe-wrap input[type=range] { flex: 1; accent-color: var(--accent); }
+  .rpe-wrap input[type=range] { flex: 1; accent-color: var(--accent); padding: 0; }
   .history-item { border-bottom: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-between; align-items: flex-start; }
   .history-item:last-child { border-bottom: none; }
   .hi-left .hi-name { font-weight: 700; font-size: 14px; }
@@ -51,9 +52,11 @@
   .chart-wrap { width: 100%; overflow-x: auto; }
   canvas { display: block; }
   .tabs { display: flex; background: var(--surface); border-top: 1px solid var(--border); height: var(--tab-h); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
-  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: var(--text2); font-size: 10px; border: none; background: none; transition: color .2s; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: var(--text2); font-size: 10px; border: none; background: none; transition: color .2s; position: relative; }
   .tab.active { color: var(--accent); }
   .tab svg { width: 22px; height: 22px; }
+  .tab .dot { position: absolute; top: 8px; right: calc(50% - 18px); width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); display: none; }
+  .tab .dot.on { display: block; }
   .chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
   .chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; }
   .chip.active { border-color: var(--accent); background: rgba(108,99,255,.15); color: var(--accent); }
@@ -71,6 +74,41 @@
   .sync-status { font-size: 11px; text-align: center; margin-top: 6px; min-height: 16px; }
   .sync-ok { color: var(--green); }
   .sync-err { color: var(--accent2); }
+
+  /* v2: 오늘 / 증상 */
+  .light { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; flex: none; }
+  .l-green { background: var(--green); } .l-yellow { background: var(--yellow); }
+  .l-red { background: var(--accent2); } .l-none { background: var(--border); }
+  .banner { background: rgba(255,209,102,.12); border: 1px solid var(--yellow); color: var(--yellow); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; cursor: pointer; }
+  .phase-badge { display: inline-block; background: rgba(108,99,255,.15); color: var(--accent); border: 1px solid var(--accent); border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; }
+  .today-title { font-size: 18px; font-weight: 800; margin: 6px 0 2px; }
+  .today-sub { font-size: 12px; color: var(--text2); }
+  .check-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type=checkbox] { width: 22px; height: 22px; flex: none; margin-top: 1px; accent-color: var(--accent); padding: 0; }
+  .ci-body { flex: 1; min-width: 0; }
+  .ci-name { font-weight: 700; font-size: 14px; }
+  .ci-target { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .ci-note { margin-top: 6px; padding: 6px 9px; font-size: 12px; }
+  .check-item.done .ci-name { color: var(--text2); text-decoration: line-through; }
+  .rule-list { font-size: 12px; color: var(--text2); line-height: 1.7; padding-left: 16px; }
+  .rule-list b { color: var(--text); }
+  .sym-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .sym-grid input { text-align: center; padding: 8px 2px; }
+  .sym-grid label { text-align: center; font-size: 10px; }
+  .region-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .region-name { font-weight: 800; font-size: 15px; }
+  .verdict { border-radius: 10px; padding: 9px 11px; font-size: 12px; margin-top: 8px; line-height: 1.5; }
+  .v-green { background: rgba(67,217,160,.12); border: 1px solid var(--green); }
+  .v-yellow { background: rgba(255,209,102,.12); border: 1px solid var(--yellow); }
+  .v-red { background: rgba(255,101,132,.12); border: 1px solid var(--accent2); }
+  .v-none { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+  .neuro-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 12px; color: var(--text2); }
+  .neuro-row input { width: 20px; height: 20px; flex: none; padding: 0; accent-color: var(--accent2); }
+  .sym-hist { border-bottom: 1px solid var(--border); padding: 9px 0; font-size: 12px; }
+  .sym-hist:last-child { border-bottom: none; }
+  .sym-hist .sh-date { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .sym-hist .sh-line { color: var(--text2); display: flex; gap: 6px; align-items: center; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -87,10 +125,62 @@
 
 <div class="content" id="content">
 
-  <!-- 개인운동 -->
-  <div class="tab-panel active" id="panel-lift">
+  <!-- 오늘 -->
+  <div class="tab-panel active" id="panel-today">
+    <div id="pendingBanner"></div>
     <div class="card">
-      <div class="card-title">운동 추가</div>
+      <span class="phase-badge" id="phaseBadge"></span>
+      <div class="today-title" id="todayTitle"></div>
+      <div class="today-sub" id="todaySub"></div>
+      <div id="todayProgress" class="today-sub" style="margin-top:6px"></div>
+    </div>
+    <div class="card"><div class="card-title">오늘 할 일</div><div id="todayItems"></div></div>
+    <div id="todayRules"></div>
+    <div class="section-label">오늘 증상 판정</div>
+    <div class="card" id="todayVerdict"></div>
+    <button class="btn btn-primary" onclick="openSymptom(today())">🩺 증상 기록하기</button>
+    <button class="btn btn-notion" onclick="copyForClipboard()">📋 오늘 일지 복사 (Notion용)</button>
+    <div class="sync-status" id="syncStatus"></div>
+  </div>
+
+  <!-- 증상 -->
+  <div class="tab-panel" id="panel-symptom">
+    <div class="card">
+      <div class="card-title">증상 기록 (0~10)</div>
+      <div class="form-group">
+        <label>날짜</label>
+        <input type="date" id="symDate" onchange="loadSymptomForm(this.value)">
+      </div>
+      <div class="today-sub">운동 중 최대 · 직후 · 그날 밤 · 다음날 아침. 비워두면 미입력으로 처리합니다. 같은 날짜를 다시 열어 아침 값만 추가하면 됩니다.</div>
+    </div>
+    <div id="symRegions"></div>
+    <div class="neuro-row card" style="margin-top:0">
+      <input type="checkbox" id="sym_neuro" onchange="updateSymptomVerdict()">
+      <label for="sym_neuro" style="margin:0;font-size:12px">새로운 팔 저림 · 감각저하 · 명확한 근력저하 · 반복되는 팔 떨림이 있었음</label>
+    </div>
+    <div class="card">
+      <div class="form-group" style="margin-bottom:0">
+        <label>메모 (찝힘 각도/동작, 수면 자세, 앉은 시간 등)</label>
+        <textarea id="sym_note" placeholder="예: 벤치 하강 중간 지점에서 앞쪽 찝힘"></textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSymptoms()">저장</button>
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">판정 규칙</div>
+      <ul class="rule-list">
+        <li><b>🟢</b> 최대 ≤2, 악화 없음 → 유지 또는 점진 진행</li>
+        <li><b>🟡</b> 3~4, 또는 직후/다음날 +2 이상 악화 → 해당 동작 중량·ROM·볼륨 ↓</li>
+        <li><b>🔴</b> ≥5, 날카로운 찝힘, 저림·근력저하·떨림 → 해당 동작 중단</li>
+      </ul>
+    </div>
+    <div class="section-label">최근 기록</div>
+    <div class="card" id="symHistory"><div class="empty">아직 기록 없음</div></div>
+  </div>
+
+  <!-- 개인운동 -->
+  <div class="tab-panel" id="panel-lift">
+    <div class="card">
+      <div class="card-title">운동 추가 (kg)</div>
       <div class="form-group">
         <label>종목</label>
         <select id="liftExercise" onchange="document.getElementById('customExWrap').style.display=this.value==='직접 입력'?'block':'none'">
@@ -98,7 +188,8 @@
           <option>바벨 언더그립 벤트오버 로우</option><option>불가리안 스플릿스쿼트</option>
           <option>랜드마인 프레스</option><option>바벨 힙쓰러스트</option><option>스캡풀업</option>
           <option>스트릭트 풀업</option><option>TGU</option><option>정규 푸쉬업</option>
-          <option>링 페이스풀</option><option>OHP</option><option>KB 스윙</option><option>직접 입력</option>
+          <option>링 페이스풀</option><option>OHP</option><option>KB 스윙</option>
+          <option>백팩 RDL</option><option>시티드 로우 머신</option><option>스캡션</option><option>직접 입력</option>
         </select>
       </div>
       <div class="form-group" id="customExWrap" style="display:none">
@@ -112,11 +203,6 @@
 
     <div class="section-label">오늘 기록</div>
     <div class="card" id="todayLiftList"><div class="empty">아직 기록 없음</div></div>
-
-    <div style="padding: 0 0 4px">
-      <button class="btn btn-notion" onclick="copyForClipboard()">📋 오늘 일지 복사</button>
-      <div class="sync-status" id="syncStatus"></div>
-    </div>
 
     <div class="section-label">PR 현황</div>
     <div class="card" id="prList"><div class="empty">데이터 없음</div></div>
@@ -162,6 +248,7 @@
         <label>동작 내역 / 메모</label>
         <textarea id="wodMemo" placeholder="토투바 → Knee to Chest 스케일&#10;Box Jump Over 20회 등"></textarea>
       </div>
+      <div id="wodHoldWarn"></div>
       <button class="btn btn-primary" onclick="saveWod()">저장</button>
     </div>
     <div class="section-label">WOD 히스토리</div>
@@ -171,190 +258,518 @@
   <!-- 통계 -->
   <div class="tab-panel" id="panel-stats">
     <div class="stat-grid">
+      <div class="stat-box"><div class="val" id="statAttend">-</div><div class="lbl">화·목 수업 출석</div></div>
       <div class="stat-box"><div class="val" id="statTotalSessions">0</div><div class="lbl">총 운동 일수</div></div>
       <div class="stat-box"><div class="val" id="statWodCount">0</div><div class="lbl">WOD 횟수</div></div>
       <div class="stat-box"><div class="val" id="statAvgRpe">-</div><div class="lbl">평균 RPE</div></div>
-      <div class="stat-box"><div class="val" id="statPrCount">0</div><div class="lbl">PR 갱신</div></div>
+      <div class="stat-box"><div class="val" id="statGreenRate">-</div><div class="lbl">🟢 판정 비율</div></div>
+      <div class="stat-box"><div class="val" id="statMorningRate">-</div><div class="lbl">다음날 아침 입력률</div></div>
     </div>
     <div class="card">
-      <div class="card-title">종목별 최고 중량</div>
+      <div class="card-title">종목별 최고 중량 (kg)</div>
       <div class="form-group">
         <select id="chartExercise" onchange="drawLiftChart()"><option value="">종목 선택</option></select>
       </div>
       <div class="chart-wrap"><canvas id="liftChart" height="160"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">주간 볼륨 (lbs)</div>
+      <div class="card-title">주간 볼륨 (kg)</div>
       <div class="chart-wrap"><canvas id="volumeChart" height="140"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title">WOD RPE 추이</div>
       <div class="chart-wrap"><canvas id="rpeChart" height="120"></canvas></div>
     </div>
+    <div class="card">
+      <div class="card-title">데이터 백업</div>
+      <div class="today-sub">기록은 이 기기의 브라우저에만 저장됩니다. 기기 변경·사이트 데이터 삭제 시 사라지므로 주 1회 백업을 권장합니다.</div>
+      <button class="btn btn-primary" onclick="exportJson()">⬇️ 백업 파일 저장</button>
+      <button class="btn btn-ghost" onclick="copyJson()">📋 백업을 클립보드로 복사</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">⬆️ 백업 파일에서 복원</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importJson(this)">
+      <div class="sync-status" id="backupStatus"></div>
+    </div>
   </div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('lift',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M2 8h4M18 8h4M2 16h4M18 16h4"/></svg>개인운동
+  <button class="tab active" data-tab="today" onclick="switchTab('today')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>오늘
   </button>
-  <button class="tab" onclick="switchTab('wod',this)">
+  <button class="tab" data-tab="symptom" onclick="switchTab('symptom')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>증상<span class="dot" id="symDot"></span>
+  </button>
+  <button class="tab" data-tab="lift" onclick="switchTab('lift')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v16M18 4v16M2 8h4M18 8h4M2 16h4M18 16h4"/></svg>운동
+  </button>
+  <button class="tab" data-tab="wod" onclick="switchTab('wod')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>WOD
   </button>
-  <button class="tab" onclick="switchTab('stats',this)">
+  <button class="tab" data-tab="stats" onclick="switchTab('stats')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>통계
   </button>
 </div>
 
 <script>
-let state = { lifts: [], wods: [], prs: {} };
+/* ============================================================
+   상수 / 스케줄 (Notion '2026 퍼포먼스 플랜' 10/13~ 고정 주간 스케줄)
+   ============================================================ */
+const LS_V2 = 'fitness_tracker_v2';
+const LS_V1 = 'fitness_tracker_v1';
+const LBS_TO_KG = 0.4536;
+const PHASE_START = '2026-10-13';
+const PHASE = { code: 'P0', name: '재진입', range: '10/13 ~ 11/9' };
+
+const REGIONS = [
+  { key: 'shoulder', label: '어깨 (우)' },
+  { key: 'neck',     label: '목·승모' },
+  { key: 'knee',     label: '무릎 (우)' }
+];
+const SYM_FIELDS = [
+  { key: 'during',  label: '운동 중 최대' },
+  { key: 'post',    label: '직후' },
+  { key: 'night',   label: '그날 밤' },
+  { key: 'morning', label: '다음날 아침' }
+];
+
+const WARMUP_DYN = { id: 'warm_dyn', name: '동적 워밍업 5분', target: '팔 앞뒤 돌리기 · 팔 흔들기 · 캣카우 · 몸통 회전 · 맨몸 힙힌지' };
+const STRETCH_STATIC = { id: 'stretch_static', name: '정적 스트레칭 5분', target: '가슴·광배·햄스트링·대퇴사두·종아리 각 20~30초 (어깨 찝힘 범위까지 강제로 늘리지 않기)' };
+
+const REHAB_ITEMS = [
+  WARMUP_DYN,
+  { id: 'band_row',   name: '밴드 로우',     target: '15회 × 4세트' },
+  { id: 'band_er',    name: '밴드 외회전',   target: '12~15회 × 3세트' },
+  { id: 'scaption',   name: '스캡션',        target: '10~12회 × 3세트', log: '무게 kg' },
+  { id: 'incl_push',  name: '인클라인 푸쉬업', target: '6~10회 × 3세트 · 통증 없는 높이 · 하강 후 2~3초 정지', log: '높이/메모' },
+  { id: 'backpack_rdl', name: '백팩 RDL',    target: '12회 × 3세트', log: '무게 kg' },
+  { id: 'glute_bridge', name: '글루트브리지', target: '15회 × 3세트' },
+  STRETCH_STATIC
+];
+
+const SCHEDULE = {
+  1: { type: 'rehab',    title: '월 · 어깨·무릎 재활 30분', sub: '재활 — 회전근개·견갑·밀기 능력 회복', items: REHAB_ITEMS },
+  2: { type: 'class',    title: '화 · 크로스핏 수업', sub: '수업 복귀 — RX보다 증상·기능 반응 우선', items: null },
+  3: { type: 'recovery', title: '수 · 회복 15분', sub: '훈련이 아니라 회복과 움직임 유지', items: [
+        { id: 'band_er2',  name: '밴드 외회전',  target: '15회 × 2세트' },
+        { id: 'scaption2', name: '스캡션',       target: '10회 × 2세트', log: '무게 kg' },
+        { id: 'glute2',    name: '글루트브리지', target: '15회 × 2세트' },
+        { id: 'walk10',    name: '가볍게 걷기 10분', target: '가능하면' }
+      ] },
+  4: { type: 'class',    title: '목 · 크로스핏 수업', sub: '화요일 운동 후·수요일 아침 반응 확인 후 부하 결정', items: null },
+  5: { type: 'rehab',    title: '금 · 어깨·무릎 재활 30분', sub: '월요일과 동일', items: REHAB_ITEMS },
+  6: { type: 'walk',     title: '토 · 걷기 또는 휴식', sub: '피로가 남아 있으면 휴식 우선', items: [
+        { id: 'walk30', name: '걷기 30~40분', target: '선택 (피로하면 휴식)' }
+      ] },
+  0: { type: 'rest',     title: '일 · 완전 휴식', sub: '일상적인 가벼운 움직임만', items: [] }
+};
+const CLASS_ITEMS = [
+  { id: 'warm_dyn_c', name: '수업 전 동적 스트레칭', target: '' },
+  { id: 'act_er',     name: '밴드 외회전', target: '15회 × 2세트' },
+  { id: 'act_row',    name: '밴드 로우',   target: '15회 × 2세트' },
+  { id: 'act_scap',   name: '맨손 스캡션', target: '10회 × 2세트' },
+  { id: 'class_attend', name: '크로스핏 수업 참여', target: 'WOD 내용은 WOD 탭에 기록', log: '스케일/메모' },
+  { id: 'stretch_c',  name: '운동 후 정적 스트레칭', target: '5~7분' }
+];
+SCHEDULE[2].items = CLASS_ITEMS;
+SCHEDULE[4].items = CLASS_ITEMS;
+
+const CLASS_RULES = [
+  '<b>데드리프트·로우</b>: 증상 반응이 괜찮으면 진행',
+  '<b>스쿼트</b>: 우측 무릎 반응에 따라 중량·깊이 조절',
+  '<b>푸쉬업</b>: 통증 시 인클라인으로 조절',
+  '<b>오버헤드</b>: 가벼운 중량부터 단계적으로',
+  '<b>보류</b>: 킵핑 · HSPU · 딥 · 스내치 · 월워크',
+  'RX보다 <b>증상·기능 반응</b> 우선'
+];
+const HOLD_KEYWORDS = ['킵핑', 'kipping', 'hspu', '핸드스탠드', '딥', 'dip', '스내치', 'snatch', '월워크', 'wall walk', 'wallwalk', '머슬업', 'muscle-up', 'muscle up', '윈드밀', '아놀드', '풀오버'];
+
+/* ============================================================
+   유틸
+   ============================================================ */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function ymd(d) { const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; }
+function today() { return ymd(new Date()); }
+function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function addDays(s, n) { const d = parseDate(s); d.setDate(d.getDate() + n); return ymd(d); }
+function fmt(s) { const d = parseDate(s); return `${d.getMonth() + 1}/${d.getDate()}`; }
+function todayKo() { return new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }); }
+function numOrNull(v) { if (v === '' || v == null) return null; const n = Number(v); return isNaN(n) ? null : n; }
+function r1(n) { return Math.round(n * 10) / 10; }
+
+/* ============================================================
+   판정 로직 (순수 함수 — UI와 분리)
+   ============================================================ */
+function judgeSymptom(e, prevMorning) {
+  const ks = ['during', 'post', 'night', 'morning'];
+  const nums = ks.map(k => numOrNull(e[k])).filter(v => v !== null);
+  const during = numOrNull(e.during), post = numOrNull(e.post), morning = numOrNull(e.morning);
+  const pending = (during !== null || post !== null || numOrNull(e.night) !== null) && morning === null;
+
+  if (e.neuro) {
+    return { level: 'red', pending: false, max: Math.max(0, ...nums),
+      reason: '저림·감각저하·근력저하·떨림 보고',
+      advice: '해당 동작 중단. 경추 신경학적 요소는 어깨 부하와 분리해 재평가(정형외과/재활의학과).' };
+  }
+  if (!nums.length) return { level: 'none', pending: false, max: 0, reason: '', advice: '입력 없음' };
+
+  const max = Math.max(...nums);
+  const worsenNext = morning !== null && prevMorning !== null && prevMorning !== undefined && (morning - prevMorning) >= 2;
+  const worsenPost = post !== null && during !== null && (post - during) >= 2;
+
+  if (max >= 5) return { level: 'red', pending, max, reason: `최대 ${max}/10`,
+    advice: '해당 동작 중단. 날카로운 찝힘이면 즉시 중단하고 다음 세션 부하를 크게 낮추기.' };
+  if (max >= 3 || worsenNext || worsenPost) {
+    const why = [];
+    if (max >= 3) why.push(`최대 ${max}/10`);
+    if (worsenPost) why.push('운동 직후 +2 이상 악화');
+    if (worsenNext) why.push('다음날 아침 +2 이상 악화');
+    return { level: 'yellow', pending, max, reason: why.join(' · '),
+      advice: '해당 동작의 중량·ROM·볼륨을 줄이고 다음날 아침 반응을 확인.' };
+  }
+  return { level: 'green', pending, max, reason: `최대 ${max}/10`,
+    advice: pending ? '잠정 통과. 다음날 아침 값을 입력하면 최종 판정됩니다.' : '유지 또는 소폭 진행 가능.' };
+}
+const LEVEL_RANK = { none: 0, green: 1, yellow: 2, red: 3 };
+function worstLevel(list) { return list.reduce((a, b) => LEVEL_RANK[b] > LEVEL_RANK[a] ? b : a, 'none'); }
+function levelIcon(l) { return { green: '🟢', yellow: '🟡', red: '🔴', none: '⚪' }[l]; }
+function levelText(l) { return { green: '유지 / 소폭 진행', yellow: '해당 동작 감량', red: '해당 동작 중단', none: '기록 없음' }[l]; }
+
+/* ============================================================
+   상태 / 저장 / 마이그레이션
+   ============================================================ */
+let state = emptyState();
+function emptyState() { return { version: 2, lifts: [], wods: [], prs: {}, sessions: {}, symptoms: [] }; }
+
+function groupSummary(sets) {
+  const groups = [];
+  sets.forEach(s => {
+    const g = groups[groups.length - 1];
+    if (g && g.weight === s.weight && g.reps === s.reps) g.n++;
+    else groups.push({ weight: s.weight, reps: s.reps, n: 1 });
+  });
+  return groups.map(g => `${g.n}×${g.weight}kg×${g.reps}`).join(' / ');
+}
+function migrateV1(old) {
+  const s = emptyState();
+  s.wods = old.wods || [];
+  s.lifts = (old.lifts || []).map(l => {
+    const sets = (l.sets || []).map(x => ({ weight: r1(x.weight * LBS_TO_KG), reps: x.reps }));
+    return Object.assign({}, l, { sets, summary: groupSummary(sets) });
+  });
+  Object.keys(old.prs || {}).forEach(k => { s.prs[k] = r1(old.prs[k] * LBS_TO_KG); });
+  return s;
+}
+function normalize(s) {
+  const e = emptyState();
+  return Object.assign(e, s, {
+    version: 2,
+    lifts: s.lifts || [], wods: s.wods || [], prs: s.prs || {},
+    sessions: s.sessions || {}, symptoms: s.symptoms || []
+  });
+}
+let migratedNotice = false;
+function loadState() {
+  try {
+    const v2 = localStorage.getItem(LS_V2);
+    if (v2) { state = normalize(JSON.parse(v2)); return; }
+    const v1 = localStorage.getItem(LS_V1);
+    if (v1) {
+      state = migrateV1(JSON.parse(v1));
+      migratedNotice = true;
+      save(); // v1 키는 그대로 남겨 둠 (롤백용)
+    }
+  } catch (e) { state = emptyState(); }
+}
+function save() { try { localStorage.setItem(LS_V2, JSON.stringify(state)); } catch (e) {} }
+
+/* ============================================================
+   탭
+   ============================================================ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('content').scrollTop = 0;
+  if (name === 'today') renderToday();
+  if (name === 'symptom') { if (!document.getElementById('symDate').value) document.getElementById('symDate').value = today(); loadSymptomForm(document.getElementById('symDate').value); renderSymHistory(); }
+  if (name === 'stats') { updateStats(); setTimeout(drawAllCharts, 50); }
+}
+function openSymptom(date) {
+  document.getElementById('symDate').value = date;
+  switchTab('symptom');
+}
+
+/* ============================================================
+   오늘 탭
+   ============================================================ */
+function sessionOf(date) {
+  if (!state.sessions[date]) state.sessions[date] = { checks: {}, notes: {} };
+  return state.sessions[date];
+}
+function toggleCheck(id) {
+  const s = sessionOf(today());
+  s.checks[id] = !s.checks[id];
+  save(); renderToday();
+}
+function setNote(id, v) { sessionOf(today()).notes[id] = v; save(); }
+
+function daysSincePhase(d) { return Math.floor((parseDate(d) - parseDate(PHASE_START)) / 86400000); }
+
+function findPending() {
+  const t = today();
+  const found = [];
+  for (let i = 1; i <= 3; i++) {
+    const d = addDays(t, -i);
+    const hit = state.symptoms.filter(x => x.date === d &&
+      numOrNull(x.morning) === null &&
+      (numOrNull(x.during) !== null || numOrNull(x.post) !== null || numOrNull(x.night) !== null));
+    if (hit.length) found.push({ date: d, regions: hit.map(h => regionLabel(h.region)) });
+  }
+  return found;
+}
+function regionLabel(k) { return (REGIONS.find(r => r.key === k) || { label: k }).label; }
+
+function renderPendingBanner() {
+  const p = findPending();
+  const el = document.getElementById('pendingBanner');
+  document.getElementById('symDot').classList.toggle('on', p.length > 0);
+  if (!p.length) { el.innerHTML = ''; return; }
+  const first = p[0];
+  el.innerHTML = `<div class="banner" onclick="openSymptom('${first.date}')">⏳ ${fmt(first.date)} 다음날 아침 증상 입력 대기 (${esc(first.regions.join(', '))}) — 눌러서 입력</div>`;
+}
+
+function renderToday() {
+  const d = today();
+  const dow = parseDate(d).getDay();
+  const plan = SCHEDULE[dow];
+  document.getElementById('phaseBadge').textContent = `${PHASE.code} ${PHASE.name} · ${PHASE.range}`;
+  document.getElementById('todayTitle').textContent = plan.title;
+  document.getElementById('todaySub').textContent = plan.sub;
+  const sess = state.sessions[d] || { checks: {}, notes: {} };
+
+  const items = plan.items || [];
+  const done = items.filter(it => sess.checks[it.id]).length;
+  document.getElementById('todayProgress').textContent = items.length ? `진행 ${done}/${items.length}` : '';
+
+  const box = document.getElementById('todayItems');
+  if (!items.length) box.innerHTML = '<div class="empty">오늘은 완전 휴식입니다 😌</div>';
+  else box.innerHTML = items.map(it => `
+    <div class="check-item ${sess.checks[it.id] ? 'done' : ''}">
+      <input type="checkbox" ${sess.checks[it.id] ? 'checked' : ''} onchange="toggleCheck('${it.id}')">
+      <div class="ci-body">
+        <div class="ci-name">${esc(it.name)}</div>
+        ${it.target ? `<div class="ci-target">${esc(it.target)}</div>` : ''}
+        ${it.log ? `<input class="ci-note" type="text" placeholder="${esc(it.log)}" value="${esc((sess.notes || {})[it.id] || '')}" oninput="setNote('${it.id}',this.value)">` : ''}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('todayRules').innerHTML = plan.type === 'class'
+    ? `<div class="card"><div class="card-title">수업 원칙</div><ul class="rule-list">${CLASS_RULES.map(r => `<li>${r}</li>`).join('')}</ul></div>` : '';
+
+  renderTodayVerdict();
+  renderPendingBanner();
+}
+
+function symptomsOn(date) { return state.symptoms.filter(s => s.date === date); }
+function prevMorningFor(region, date) {
+  const prev = state.symptoms
+    .filter(s => s.region === region && s.date < date && numOrNull(s.morning) !== null)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  return prev ? numOrNull(prev.morning) : null;
+}
+function judgeEntry(e) { return judgeSymptom(e, prevMorningFor(e.region, e.date)); }
+
+function renderTodayVerdict() {
+  const list = symptomsOn(today());
+  const el = document.getElementById('todayVerdict');
+  if (!list.length) { el.innerHTML = '<div class="empty" style="padding:12px">아직 오늘 증상 기록 없음</div>'; return; }
+  const js = list.map(e => ({ e, j: judgeEntry(e) }));
+  const worst = worstLevel(js.map(x => x.j.level));
+  el.innerHTML = `<div class="verdict v-${worst}" style="margin-top:0"><b>${levelIcon(worst)} ${levelText(worst)}</b></div>` +
+    js.map(({ e, j }) => `<div class="sym-hist"><div class="sh-line"><span class="light l-${j.level}"></span><b style="color:var(--text)">${esc(regionLabel(e.region))}</b> ${esc(j.reason)}${j.pending ? ' · ⏳아침 대기' : ''}</div></div>`).join('');
+}
+
+/* ============================================================
+   증상 탭
+   ============================================================ */
+function buildSymRegions() {
+  document.getElementById('symRegions').innerHTML = REGIONS.map(r => `
+    <div class="card">
+      <div class="region-head"><span class="region-name">${r.label}</span><span class="light l-none" id="sym_light_${r.key}"></span></div>
+      <div class="sym-grid">
+        ${SYM_FIELDS.map(f => `<div><label for="sym_${r.key}_${f.key}">${f.label}</label>
+          <input type="number" inputmode="numeric" min="0" max="10" step="1" id="sym_${r.key}_${f.key}" oninput="updateSymptomVerdict()"></div>`).join('')}
+      </div>
+      <div class="verdict v-none" id="sym_verdict_${r.key}">입력 없음</div>
+    </div>`).join('');
+}
+function readRegionForm(rk, date) {
+  const e = { date, region: rk };
+  SYM_FIELDS.forEach(f => { e[f.key] = numOrNull(document.getElementById(`sym_${rk}_${f.key}`).value); });
+  return e;
+}
+function loadSymptomForm(date) {
+  if (!date) return;
+  REGIONS.forEach(r => {
+    const ex = state.symptoms.find(s => s.date === date && s.region === r.key) || {};
+    SYM_FIELDS.forEach(f => { document.getElementById(`sym_${r.key}_${f.key}`).value = ex[f.key] == null ? '' : ex[f.key]; });
+  });
+  const any = state.symptoms.find(s => s.date === date);
+  document.getElementById('sym_neuro').checked = !!(any && any.neuro);
+  document.getElementById('sym_note').value = (any && any.note) || '';
+  updateSymptomVerdict();
+}
+function updateSymptomVerdict() {
+  const date = document.getElementById('symDate').value || today();
+  const neuro = document.getElementById('sym_neuro').checked;
+  REGIONS.forEach(r => {
+    const e = readRegionForm(r.key, date); e.neuro = neuro;
+    const j = judgeSymptom(e, prevMorningFor(r.key, date));
+    document.getElementById(`sym_light_${r.key}`).className = `light l-${j.level}`;
+    const v = document.getElementById(`sym_verdict_${r.key}`);
+    v.className = `verdict v-${j.level}`;
+    v.innerHTML = j.level === 'none' ? '입력 없음'
+      : `<b>${levelIcon(j.level)} ${levelText(j.level)}${j.pending ? ' (잠정)' : ''}</b><br>${esc(j.reason)}<br>${esc(j.advice)}`;
+  });
+}
+function saveSymptoms() {
+  const date = document.getElementById('symDate').value || today();
+  const neuro = document.getElementById('sym_neuro').checked;
+  const note = document.getElementById('sym_note').value.trim();
+  let saved = 0;
+  const outOfRange = REGIONS.some(r => {
+    const e = readRegionForm(r.key, date);
+    return SYM_FIELDS.some(f => e[f.key] !== null && (e[f.key] < 0 || e[f.key] > 10));
+  });
+  if (outOfRange) return alert('증상 점수는 0~10 사이로 입력해주세요');
+  REGIONS.forEach(r => {
+    const e = readRegionForm(r.key, date);
+    const has = SYM_FIELDS.some(f => e[f.key] !== null);
+    state.symptoms = state.symptoms.filter(s => !(s.date === date && s.region === r.key));
+    if (has || (neuro && r.key === 'shoulder')) {
+      state.symptoms.push(Object.assign(e, { neuro, note }));
+      saved++;
+    }
+  });
+  save();
+  showToast(saved ? '증상 저장 완료' : '입력된 값이 없어요');
+  renderSymHistory(); renderPendingBanner(); renderTodayVerdict(); updateSymptomVerdict();
+}
+function renderSymHistory() {
+  const el = document.getElementById('symHistory');
+  const dates = [...new Set(state.symptoms.map(s => s.date))].sort().reverse().slice(0, 10);
+  if (!dates.length) { el.innerHTML = '<div class="empty">아직 기록 없음</div>'; return; }
+  el.innerHTML = dates.map(d => {
+    const lines = symptomsOn(d).map(e => {
+      const j = judgeEntry(e);
+      const v = k => e[k] == null ? '–' : e[k];
+      return `<div class="sh-line"><span class="light l-${j.level}"></span>${esc(regionLabel(e.region))} · 중 ${v('during')} / 직후 ${v('post')} / 밤 ${v('night')} / 아침 ${v('morning')}${j.pending ? ' ⏳' : ''}</div>`;
+    }).join('');
+    const note = (symptomsOn(d)[0] || {}).note;
+    return `<div class="sym-hist" onclick="openSymptom('${d}')" style="cursor:pointer"><div class="sh-date">${fmt(d)}${symptomsOn(d).some(e => e.neuro) ? ' ⚠️ 신경 증상' : ''}</div>${lines}${note ? `<div class="sh-line">📝 ${esc(note)}</div>` : ''}</div>`;
+  }).join('');
+}
+
+/* ============================================================
+   개인운동 (kg)
+   ============================================================ */
 let sets = [];
 let wodType = 'For Time', wodScale = 'RX';
 
-// localStorage 사용 (GitHub Pages에서는 가능)
-function loadState() {
-  try {
-    const s = localStorage.getItem('fitness_tracker_v1');
-    if (s) state = JSON.parse(s);
-  } catch(e) {}
-}
-function save() {
-  try { localStorage.setItem('fitness_tracker_v1', JSON.stringify(state)); } catch(e) {}
-}
-
-loadState();
-renderAll();
-
-function today() { return new Date().toISOString().split('T')[0]; }
-function fmt(d) { const dt = new Date(d); return `${dt.getMonth()+1}/${dt.getDate()}`; }
-function todayKo() {
-  return new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
-}
-document.getElementById('headerDate').textContent = todayKo();
-
-function switchTab(name, el) {
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  el.classList.add('active');
-  document.getElementById('content').scrollTop = 0;
-  if (name==='stats') { updateStats(); setTimeout(drawAllCharts,50); }
-}
-
 function selectChip(gid, el, v, val) {
-  document.querySelectorAll('#'+gid+' .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('#' + gid + ' .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  if (v==='wodType') wodType=val;
-  if (v==='wodScale') wodScale=val;
+  if (v === 'wodType') wodType = val;
+  if (v === 'wodScale') wodScale = val;
 }
-
-function addSetRow() { sets.push({sets:'',weight:'',reps:''}); renderSets(); }
+function addSetRow() { sets.push({ sets: '', weight: '', reps: '' }); renderSets(); }
 function renderSets() {
-  document.getElementById('setsContainer').innerHTML = sets.map((s,i)=>`
+  document.getElementById('setsContainer').innerHTML = sets.map((s, i) => `
     <div class="set-row">
-      <input type="number" placeholder="세트" value="${s.sets}" oninput="sets[${i}].sets=this.value" style="width:52px;text-align:center">
+      <input type="number" inputmode="numeric" placeholder="세트" value="${esc(s.sets)}" oninput="sets[${i}].sets=this.value" style="width:52px;text-align:center">
       <span>×</span>
-      <input type="number" placeholder="lbs" value="${s.weight}" oninput="sets[${i}].weight=this.value" style="width:62px;text-align:center">
+      <input type="number" inputmode="decimal" step="any" placeholder="kg" value="${esc(s.weight)}" oninput="sets[${i}].weight=this.value" style="width:62px;text-align:center">
       <span>×</span>
-      <input type="number" placeholder="rep" value="${s.reps}" oninput="sets[${i}].reps=this.value" style="width:52px;text-align:center">
+      <input type="number" inputmode="numeric" placeholder="rep" value="${esc(s.reps)}" oninput="sets[${i}].reps=this.value" style="width:52px;text-align:center">
       <button class="del" onclick="removeSet(${i})">×</button>
     </div>`).join('');
 }
-function removeSet(i) { sets.splice(i,1); renderSets(); }
-addSetRow();
+function removeSet(i) { sets.splice(i, 1); renderSets(); }
 
 function saveExercise() {
   const sel = document.getElementById('liftExercise');
-  const ex = sel.value==='직접 입력' ? document.getElementById('customEx').value.trim() : sel.value;
+  const ex = sel.value === '직접 입력' ? document.getElementById('customEx').value.trim() : sel.value;
   if (!ex) return alert('종목을 입력해주세요');
-  const valid = sets.filter(s=>s.sets&&s.weight&&s.reps);
-  if (!valid.length) return alert('세트를 하나 이상 입력해주세요');
-  const maxW = Math.max(...valid.map(s=>+s.weight));
-  const isPR = !state.prs[ex] || maxW > state.prs[ex];
+  const valid = sets.filter(s => s.sets && s.weight !== '' && s.reps);
+  if (!valid.length) return alert('세트를 하나 이상 입력해주세요 (맨몸/밴드는 무게 0)');
+  const maxW = Math.max(...valid.map(s => +s.weight));
+  const isPR = maxW > 0 && (!state.prs[ex] || maxW > state.prs[ex]);
   if (isPR) state.prs[ex] = maxW;
-  const expanded = valid.flatMap(s=>Array(+s.sets).fill({weight:+s.weight,reps:+s.reps}));
-  state.lifts.push({ date:today(), exercise:ex, sets:expanded, isPR, summary:valid.map(s=>`${s.sets}×${s.weight}lbs×${s.reps}`).join(' / ') });
-  save(); sets=[]; addSetRow();
+  const expanded = valid.flatMap(s => Array(+s.sets).fill({ weight: +s.weight, reps: +s.reps }));
+  state.lifts.push({ date: today(), exercise: ex, sets: expanded, isPR, summary: valid.map(s => `${s.sets}×${s.weight}kg×${s.reps}`).join(' / ') });
+  save(); sets = []; addSetRow();
   renderTodayLifts(); renderPRList();
-  if (isPR) showToast(`🏆 PR 갱신! ${ex} ${maxW}lbs`);
-  else showToast('저장 완료!');
+  showToast(isPR ? `🏆 PR 갱신! ${ex} ${maxW}kg` : '저장 완료!');
 }
-
 function deleteLift(idx) {
   const l = state.lifts[idx];
+  if (!l) return;
+  state.lifts.splice(idx, 1);
   if (l.isPR) {
     const ex = l.exercise;
-    state.lifts.splice(idx,1);
-    const rem = state.lifts.filter(x=>x.exercise===ex);
-    if (rem.length) state.prs[ex] = Math.max(...rem.map(x=>Math.max(...x.sets.map(s=>s.weight))));
+    const rem = state.lifts.filter(x => x.exercise === ex);
+    if (rem.length) state.prs[ex] = Math.max(...rem.map(x => Math.max(...x.sets.map(s => s.weight))));
     else delete state.prs[ex];
-  } else { state.lifts.splice(idx,1); }
+  }
   save(); renderTodayLifts(); renderPRList();
 }
-
 function renderTodayLifts() {
   const t = today();
-  const items = state.lifts.filter(l=>l.date===t);
+  const items = state.lifts.filter(l => l.date === t);
   const el = document.getElementById('todayLiftList');
-  if (!items.length) { el.innerHTML='<div class="empty">아직 기록 없음</div>'; return; }
-  el.innerHTML = items.map((l,i)=>`
+  if (!items.length) { el.innerHTML = '<div class="empty">아직 기록 없음</div>'; return; }
+  el.innerHTML = items.map(l => `
     <div class="history-item">
       <div class="hi-left">
-        <div class="hi-name">${l.exercise}${l.isPR?'<span class="pr-badge">PR</span>':''}</div>
-        <div class="hi-detail">${l.summary||l.sets.map((s,j)=>`${j+1}세트 ${s.weight}lbs×${s.reps}`).join(' · ')}</div>
+        <div class="hi-name">${esc(l.exercise)}${l.isPR ? '<span class="pr-badge">PR</span>' : ''}</div>
+        <div class="hi-detail">${esc(l.summary || l.sets.map((s, j) => `${j + 1}세트 ${s.weight}kg×${s.reps}`).join(' · '))}</div>
       </div>
       <div class="hi-right">
-        <div class="hi-weight">${Math.max(...l.sets.map(s=>s.weight))}lbs</div>
+        <div class="hi-weight">${Math.max(...l.sets.map(s => s.weight))}kg</div>
         <button onclick="deleteLift(${state.lifts.indexOf(l)})" style="background:none;border:none;color:var(--accent2);font-size:11px;cursor:pointer;margin-top:4px;">삭제</button>
       </div>
     </div>`).join('');
 }
-
 function renderPRList() {
   const el = document.getElementById('prList');
   const keys = Object.keys(state.prs);
-  if (!keys.length) { el.innerHTML='<div class="empty">데이터 없음</div>'; return; }
-  el.innerHTML = keys.map(k=>`
+  if (!keys.length) { el.innerHTML = '<div class="empty">데이터 없음</div>'; return; }
+  el.innerHTML = keys.map(k => `
     <div class="history-item">
-      <div class="hi-left"><div class="hi-name">${k}</div></div>
-      <div class="hi-right"><div class="hi-weight">${state.prs[k]}lbs</div></div>
+      <div class="hi-left"><div class="hi-name">${esc(k)}</div></div>
+      <div class="hi-right"><div class="hi-weight">${state.prs[k]}kg</div></div>
     </div>`).join('');
 }
 
-function copyForClipboard() {
-  const t = today();
-  const todayLifts = state.lifts.filter(l => l.date === t);
-  const todayWods = state.wods.filter(w => w.date === t);
-  if (!todayLifts.length && !todayWods.length) { showToast('저장할 기록이 없어요'); return; }
-  const dateTitle = new Date().toLocaleDateString('ko-KR');
-  let lines = [`[운동 일지] ${dateTitle}\n`];
-  if (todayLifts.length) {
-    lines.push('## 💪 개인운동');
-    todayLifts.forEach(l => {
-      const maxW = Math.max(...l.sets.map(s => s.weight));
-      lines.push(`- ${l.exercise} | ${l.summary||''} | 최고 ${maxW}lbs${l.isPR ? ' 🏆PR' : ''}`);
-    });
-  }
-  if (todayWods.length) {
-    lines.push('\n## 🔥 WOD');
-    todayWods.forEach(w => {
-      lines.push(`- ${w.name} | ${w.type}${w.time?' | ⏱'+w.time:''}${w.rounds?' | 🔄'+w.rounds+'라운드':''} | ${w.scale} | RPE ${w.rpe}${w.memo?'\n  '+w.memo:''}`);
-    });
-  }
-  const text = lines.join('\n');
-  navigator.clipboard.writeText(text).then(() => {
-    document.getElementById('syncStatus').innerHTML = '<span class="sync-ok">✅ 클립보드에 복사됐어요!</span>';
-    showToast('📋 복사 완료!');
-  }).catch(() => {
-    document.getElementById('syncStatus').innerHTML = `<textarea style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;height:100px;margin-top:6px">${text}</textarea>`;
-  });
+/* ============================================================
+   WOD
+   ============================================================ */
+function holdMovementsIn(text) {
+  const t = (text || '').toLowerCase();
+  return HOLD_KEYWORDS.filter(k => t.includes(k.toLowerCase()));
 }
-
+function updateWodWarn() {
+  const hits = holdMovementsIn(document.getElementById('wodName').value + ' ' + document.getElementById('wodMemo').value);
+  document.getElementById('wodHoldWarn').innerHTML = hits.length
+    ? `<div class="banner" style="cursor:default">⚠️ 보류/금지 동작 포함 가능: ${esc([...new Set(hits)].join(', '))} — 스케일 여부를 확인하세요.</div>` : '';
+}
 function saveWod() {
   const name = document.getElementById('wodName').value.trim();
   if (!name) return alert('WOD 이름을 입력해주세요');
   state.wods.push({
-    date:today(), name, type:wodType,
+    date: today(), name, type: wodType,
     time: document.getElementById('wodTime').value,
     rounds: document.getElementById('wodRounds').value,
     scale: wodScale,
@@ -362,155 +777,274 @@ function saveWod() {
     memo: document.getElementById('wodMemo').value.trim()
   });
   save();
-  ['wodName','wodTime','wodRounds','wodMemo'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('rpeSlider').value=7;
-  document.getElementById('rpeDisplay').textContent=7;
+  ['wodName', 'wodTime', 'wodRounds', 'wodMemo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rpeSlider').value = 7;
+  document.getElementById('rpeDisplay').textContent = 7;
+  document.getElementById('wodHoldWarn').innerHTML = '';
   renderWodHistory();
-  showToast('WOD 저장 완료!');
+  showToast('WOD 저장 완료! 증상 기록도 남겨주세요 🩺');
 }
-
-function rpeColor(v) { return v<=4?'#43d9a0':v<=7?'#ffd166':'#ff6584'; }
-
+function rpeColor(v) { return v <= 4 ? '#43d9a0' : v <= 7 ? '#ffd166' : '#ff6584'; }
 function renderWodHistory() {
   const el = document.getElementById('wodHistory');
-  const sorted = [...state.wods].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
-  if (!sorted.length) { el.innerHTML='<div class="empty">아직 기록 없음</div>'; return; }
-  el.innerHTML = sorted.map(w=>`
+  const sorted = [...state.wods].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
+  if (!sorted.length) { el.innerHTML = '<div class="empty">아직 기록 없음</div>'; return; }
+  el.innerHTML = sorted.map(w => `
     <div class="wod-item">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="wod-name">${w.name}</span>
-        <span class="scale-badge ${w.scale==='RX'?'rx':'scaled'}">${w.scale}</span>
+        <span class="wod-name">${esc(w.name)}</span>
+        <span class="scale-badge ${w.scale === 'RX' ? 'rx' : 'scaled'}">${esc(w.scale)}</span>
       </div>
       <div class="wod-meta">
-        ${fmt(w.date)} · ${w.type}
-        ${w.time?'· ⏱'+w.time:''}
-        ${w.rounds?'· 🔄'+w.rounds+'라운드':''}
+        ${fmt(w.date)} · ${esc(w.type)}
+        ${w.time ? '· ⏱' + esc(w.time) : ''}
+        ${w.rounds ? '· 🔄' + esc(w.rounds) + '라운드' : ''}
         · <span class="rpe-dot" style="background:${rpeColor(w.rpe)}"></span>RPE ${w.rpe}
       </div>
-      ${w.memo?`<div class="wod-meta" style="margin-top:4px;color:var(--text)">${w.memo.split('\n')[0]}</div>`:''}
+      ${w.memo ? `<div class="wod-meta" style="margin-top:4px;color:var(--text)">${esc(w.memo.split('\n')[0])}</div>` : ''}
     </div>`).join('');
 }
 
-function updateStats() {
-  const days = new Set([...state.lifts.map(l=>l.date),...state.wods.map(w=>w.date)]).size;
-  document.getElementById('statTotalSessions').textContent=days;
-  document.getElementById('statWodCount').textContent=state.wods.length;
-  document.getElementById('statAvgRpe').textContent=state.wods.length
-    ?(state.wods.reduce((a,w)=>a+w.rpe,0)/state.wods.length).toFixed(1):'-';
-  document.getElementById('statPrCount').textContent=state.lifts.filter(l=>l.isPR).length;
-  const sel=document.getElementById('chartExercise');
-  const exs=[...new Set(state.lifts.map(l=>l.exercise))];
-  sel.innerHTML='<option value="">종목 선택</option>'+exs.map(e=>`<option>${e}</option>`).join('');
-}
-
-function drawAllCharts() { drawLiftChart(); drawVolumeChart(); drawRpeChart(); }
-
-function drawLiftChart() {
-  const ex=document.getElementById('chartExercise').value;
-  const canvas=document.getElementById('liftChart');
-  const ctx=canvas.getContext('2d');
-  const W=canvas.parentElement.clientWidth-2;
-  canvas.width=W; canvas.height=160; ctx.clearRect(0,0,W,160);
-  const data=state.lifts.filter(l=>l.exercise===ex)
-    .map(l=>({date:l.date,max:Math.max(...l.sets.map(s=>s.weight))}))
-    .sort((a,b)=>a.date.localeCompare(b.date));
-  if (!ex||data.length<1) {
-    ctx.fillStyle='#888899';ctx.font='13px sans-serif';ctx.textAlign='center';
-    ctx.fillText('종목을 선택하세요',W/2,80);return;
+/* ============================================================
+   통계
+   ============================================================ */
+function attendanceStats() {
+  const t = today();
+  let expected = 0, attended = 0;
+  for (let d = PHASE_START; d <= t; d = addDays(d, 1)) {
+    const dow = parseDate(d).getDay();
+    if (dow !== 2 && dow !== 4) continue;
+    const ok = !!(state.sessions[d] && state.sessions[d].checks.class_attend);
+    if (d < t || ok) expected++;
+    if (ok) attended++;
   }
-  drawLine(ctx,W,160,data.map(d=>fmt(d.date)),data.map(d=>d.max),'#6c63ff');
+  return { expected, attended };
 }
+function updateStats() {
+  const days = new Set([...state.lifts.map(l => l.date), ...state.wods.map(w => w.date)]).size;
+  document.getElementById('statTotalSessions').textContent = days;
+  document.getElementById('statWodCount').textContent = state.wods.length;
+  document.getElementById('statAvgRpe').textContent = state.wods.length
+    ? (state.wods.reduce((a, w) => a + w.rpe, 0) / state.wods.length).toFixed(1) : '-';
+  const a = attendanceStats();
+  document.getElementById('statAttend').textContent = a.expected ? `${a.attended}/${a.expected}` : '-';
 
+  const judged = state.symptoms.map(judgeEntry).filter(j => j.level !== 'none');
+  document.getElementById('statGreenRate').textContent = judged.length
+    ? Math.round(judged.filter(j => j.level === 'green').length / judged.length * 100) + '%' : '-';
+  const sessionDays = state.symptoms.filter(s => numOrNull(s.during) !== null || numOrNull(s.post) !== null);
+  const t = today();
+  const due = sessionDays.filter(s => s.date < t);
+  document.getElementById('statMorningRate').textContent = due.length
+    ? Math.round(due.filter(s => numOrNull(s.morning) !== null).length / due.length * 100) + '%' : '-';
+
+  const sel = document.getElementById('chartExercise');
+  const cur = sel.value;
+  const exs = [...new Set(state.lifts.map(l => l.exercise))];
+  sel.innerHTML = '<option value="">종목 선택</option>' + exs.map(e => `<option>${esc(e)}</option>`).join('');
+  if (exs.includes(cur)) sel.value = cur;
+}
+function drawAllCharts() { drawLiftChart(); drawVolumeChart(); drawRpeChart(); }
+function drawLiftChart() {
+  const ex = document.getElementById('chartExercise').value;
+  const canvas = document.getElementById('liftChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth - 2;
+  canvas.width = W; canvas.height = 160; ctx.clearRect(0, 0, W, 160);
+  const data = state.lifts.filter(l => l.exercise === ex)
+    .map(l => ({ date: l.date, max: Math.max(...l.sets.map(s => s.weight)) }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (!ex || data.length < 1) {
+    ctx.fillStyle = '#888899'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('종목을 선택하세요', W / 2, 80); return;
+  }
+  drawLine(ctx, W, 160, data.map(d => fmt(d.date)), data.map(d => d.max), '#6c63ff');
+}
 function drawVolumeChart() {
-  const canvas=document.getElementById('volumeChart');
-  const ctx=canvas.getContext('2d');
-  const W=canvas.parentElement.clientWidth-2;
-  canvas.width=W;canvas.height=140;ctx.clearRect(0,0,W,140);
-  const wv={};
-  state.lifts.forEach(l=>{
-    const d=new Date(l.date),mon=new Date(d);
-    mon.setDate(d.getDate()-d.getDay()+1);
-    const wk=mon.toISOString().split('T')[0];
-    wv[wk]=(wv[wk]||0)+l.sets.reduce((a,s)=>a+s.weight*s.reps,0);
+  const canvas = document.getElementById('volumeChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth - 2;
+  canvas.width = W; canvas.height = 140; ctx.clearRect(0, 0, W, 140);
+  const wv = {};
+  state.lifts.forEach(l => {
+    const dow = (parseDate(l.date).getDay() + 6) % 7; // 월=0
+    const wk = addDays(l.date, -dow);
+    wv[wk] = (wv[wk] || 0) + l.sets.reduce((a, s) => a + s.weight * s.reps, 0);
   });
-  const labels=Object.keys(wv).sort().slice(-8);
-  if (!labels.length){ctx.fillStyle='#888899';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('데이터 없음',W/2,70);return;}
-  drawBar(ctx,W,140,labels.map(l=>l.slice(5)),labels.map(k=>wv[k]),'#43d9a0');
+  const labels = Object.keys(wv).sort().slice(-8);
+  if (!labels.length) { ctx.fillStyle = '#888899'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('데이터 없음', W / 2, 70); return; }
+  drawBar(ctx, W, 140, labels.map(l => l.slice(5)), labels.map(k => wv[k]), '#43d9a0');
 }
-
 function drawRpeChart() {
-  const canvas=document.getElementById('rpeChart');
-  const ctx=canvas.getContext('2d');
-  const W=canvas.parentElement.clientWidth-2;
-  canvas.width=W;canvas.height=120;ctx.clearRect(0,0,W,120);
-  const data=[...state.wods].sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);
-  if (!data.length){ctx.fillStyle='#888899';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('WOD 데이터 없음',W/2,60);return;}
-  drawLine(ctx,W,120,data.map(d=>fmt(d.date)),data.map(d=>d.rpe),'#ff6584','',1,10);
+  const canvas = document.getElementById('rpeChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth - 2;
+  canvas.width = W; canvas.height = 120; ctx.clearRect(0, 0, W, 120);
+  const data = [...state.wods].sort((a, b) => a.date.localeCompare(b.date)).slice(-12);
+  if (!data.length) { ctx.fillStyle = '#888899'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('WOD 데이터 없음', W / 2, 60); return; }
+  drawLine(ctx, W, 120, data.map(d => fmt(d.date)), data.map(d => d.rpe), '#ff6584', '', 1, 10);
 }
-
-function drawLine(ctx,W,H,labels,vals,color,unit,minY,maxY){
-  const pad={t:14,r:10,b:28,l:38};
-  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
-  const mn=minY!==undefined?minY:Math.max(0,Math.min(...vals)*0.9);
-  const mx=maxY!==undefined?maxY:Math.max(...vals)*1.05||1;
-  const sy=v=>pad.t+cH-((v-mn)/(mx-mn||1))*cH;
-  const sx=i=>pad.l+(i/(labels.length-1||1))*cW;
-  ctx.strokeStyle='#2e2e3e';ctx.lineWidth=1;
-  [0,.25,.5,.75,1].forEach(t=>{
-    const y=pad.t+t*cH;
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
-    ctx.fillStyle='#888899';ctx.font='10px sans-serif';ctx.textAlign='right';
-    ctx.fillText(Math.round(mn+(1-t)*(mx-mn)),pad.l-4,y+3);
+function drawLine(ctx, W, H, labels, vals, color, unit, minY, maxY) {
+  const pad = { t: 14, r: 10, b: 28, l: 38 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const mn = minY !== undefined ? minY : Math.max(0, Math.min(...vals) * 0.9);
+  const mx = maxY !== undefined ? maxY : Math.max(...vals) * 1.05 || 1;
+  const sy = v => pad.t + cH - ((v - mn) / (mx - mn || 1)) * cH;
+  const sx = i => pad.l + (i / (labels.length - 1 || 1)) * cW;
+  ctx.strokeStyle = '#2e2e3e'; ctx.lineWidth = 1;
+  [0, .25, .5, .75, 1].forEach(t => {
+    const y = pad.t + t * cH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cW, y); ctx.stroke();
+    ctx.fillStyle = '#888899'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(mn + (1 - t) * (mx - mn)), pad.l - 4, y + 3);
   });
-  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
-  grad.addColorStop(0,color+'44');grad.addColorStop(1,color+'00');
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + cH);
+  grad.addColorStop(0, color + '44'); grad.addColorStop(1, color + '00');
   ctx.beginPath();
-  vals.forEach((v,i)=>i===0?ctx.moveTo(sx(i),sy(v)):ctx.lineTo(sx(i),sy(v)));
-  ctx.lineTo(sx(vals.length-1),pad.t+cH);ctx.lineTo(sx(0),pad.t+cH);ctx.closePath();
-  ctx.fillStyle=grad;ctx.fill();
-  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';
+  vals.forEach((v, i) => i === 0 ? ctx.moveTo(sx(i), sy(v)) : ctx.lineTo(sx(i), sy(v)));
+  ctx.lineTo(sx(vals.length - 1), pad.t + cH); ctx.lineTo(sx(0), pad.t + cH); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round';
   ctx.beginPath();
-  vals.forEach((v,i)=>i===0?ctx.moveTo(sx(i),sy(v)):ctx.lineTo(sx(i),sy(v)));
+  vals.forEach((v, i) => i === 0 ? ctx.moveTo(sx(i), sy(v)) : ctx.lineTo(sx(i), sy(v)));
   ctx.stroke();
-  vals.forEach((v,i)=>{
-    ctx.fillStyle=color;ctx.beginPath();ctx.arc(sx(i),sy(v),3.5,0,Math.PI*2);ctx.fill();
-    if(i%Math.ceil(labels.length/6)===0||i===labels.length-1){
-      ctx.fillStyle='#888899';ctx.font='9px sans-serif';ctx.textAlign='center';
-      ctx.fillText(labels[i],sx(i),H-6);
+  vals.forEach((v, i) => {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(sx(i), sy(v), 3.5, 0, Math.PI * 2); ctx.fill();
+    if (i % Math.ceil(labels.length / 6) === 0 || i === labels.length - 1) {
+      ctx.fillStyle = '#888899'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(labels[i], sx(i), H - 6);
     }
   });
 }
-
-function drawBar(ctx,W,H,labels,vals,color){
-  const pad={t:14,r:10,b:28,l:44};
-  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
-  const mx=Math.max(...vals)*1.1||1;
-  const bW=cW/labels.length*0.6,bGap=cW/labels.length;
-  ctx.strokeStyle='#2e2e3e';ctx.lineWidth=1;
-  [0,.5,1].forEach(t=>{
-    const y=pad.t+t*cH;
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
-    ctx.fillStyle='#888899';ctx.font='10px sans-serif';ctx.textAlign='right';
-    ctx.fillText(Math.round((1-t)*mx),pad.l-4,y+3);
+function drawBar(ctx, W, H, labels, vals, color) {
+  const pad = { t: 14, r: 10, b: 28, l: 44 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const mx = Math.max(...vals) * 1.1 || 1;
+  const bW = cW / labels.length * 0.6, bGap = cW / labels.length;
+  ctx.strokeStyle = '#2e2e3e'; ctx.lineWidth = 1;
+  [0, .5, 1].forEach(t => {
+    const y = pad.t + t * cH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cW, y); ctx.stroke();
+    ctx.fillStyle = '#888899'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round((1 - t) * mx), pad.l - 4, y + 3);
   });
-  vals.forEach((v,i)=>{
-    const x=pad.l+i*bGap+bGap/2-bW/2,bH=(v/mx)*cH,y=pad.t+cH-bH;
-    const g=ctx.createLinearGradient(0,y,0,y+bH);
-    g.addColorStop(0,color);g.addColorStop(1,color+'66');
-    ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x,y,bW,bH,3);ctx.fill();
-    ctx.fillStyle='#888899';ctx.font='9px sans-serif';ctx.textAlign='center';
-    ctx.fillText(labels[i],x+bW/2,H-6);
+  vals.forEach((v, i) => {
+    const x = pad.l + i * bGap + bGap / 2 - bW / 2, bH = (v / mx) * cH, y = pad.t + cH - bH;
+    const g = ctx.createLinearGradient(0, y, 0, y + bH);
+    g.addColorStop(0, color); g.addColorStop(1, color + '66');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x, y, bW, bH, 3); ctx.fill();
+    ctx.fillStyle = '#888899'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(labels[i], x + bW / 2, H - 6);
   });
 }
 
-function showToast(msg){
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;white-space:nowrap;max-width:90vw;text-align:center';
-  t.textContent=msg;document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+/* ============================================================
+   Notion용 복사 / 백업
+   ============================================================ */
+function buildDayText(t) {
+  const plan = SCHEDULE[parseDate(t).getDay()];
+  const sess = state.sessions[t] || { checks: {}, notes: {} };
+  const todayLifts = state.lifts.filter(l => l.date === t);
+  const todayWods = state.wods.filter(w => w.date === t);
+  const syms = symptomsOn(t);
+  const lines = [`[운동 일지] ${parseDate(t).toLocaleDateString('ko-KR')} — ${plan.title}\n`];
+
+  const doneItems = (plan.items || []).filter(it => sess.checks[it.id]);
+  if (doneItems.length) {
+    lines.push(`## ✅ 세션 (${doneItems.length}/${plan.items.length})`);
+    doneItems.forEach(it => lines.push(`- ${it.name}${it.target ? ' — ' + it.target : ''}${(sess.notes || {})[it.id] ? ' | ' + sess.notes[it.id] : ''}`));
+  }
+  if (todayLifts.length) {
+    lines.push('\n## 💪 개인운동');
+    todayLifts.forEach(l => {
+      const maxW = Math.max(...l.sets.map(s => s.weight));
+      lines.push(`- ${l.exercise} | ${l.summary || ''} | 최고 ${maxW}kg${l.isPR ? ' 🏆PR' : ''}`);
+    });
+  }
+  if (todayWods.length) {
+    lines.push('\n## 🔥 WOD');
+    todayWods.forEach(w => lines.push(`- ${w.name} | ${w.type}${w.time ? ' | ⏱' + w.time : ''}${w.rounds ? ' | 🔄' + w.rounds + '라운드' : ''} | ${w.scale} | RPE ${w.rpe}${w.memo ? '\n  ' + w.memo : ''}`));
+  }
+  if (syms.length) {
+    lines.push('\n## 🩺 운동 후 증상 (중/직후/밤/다음날 아침)');
+    syms.forEach(e => {
+      const j = judgeEntry(e); const v = k => e[k] == null ? '–' : e[k];
+      lines.push(`- ${regionLabel(e.region)}: ${v('during')} / ${v('post')} / ${v('night')} / ${v('morning')} → ${levelIcon(j.level)} ${levelText(j.level)}${j.pending ? ' (아침 대기)' : ''}`);
+    });
+    if (syms.some(e => e.neuro)) lines.push('- ⚠️ 저림·감각저하·근력저하·떨림 보고됨 → 경추 신경학적 평가 필요');
+    if (syms[0].note) lines.push(`- 메모: ${syms[0].note}`);
+  }
+  return { text: lines.join('\n'), empty: !doneItems.length && !todayLifts.length && !todayWods.length && !syms.length };
+}
+function copyForClipboard() {
+  const { text, empty } = buildDayText(today());
+  if (empty) { showToast('저장할 기록이 없어요'); return; }
+  const st = document.getElementById('syncStatus');
+  navigator.clipboard.writeText(text).then(() => {
+    st.innerHTML = '<span class="sync-ok">✅ 클립보드에 복사됐어요!</span>';
+    showToast('📋 복사 완료!');
+  }).catch(() => {
+    st.innerHTML = `<textarea style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;height:100px;margin-top:6px">${esc(text)}</textarea>`;
+  });
+}
+function backupSt(html) { document.getElementById('backupStatus').innerHTML = html; }
+function exportJson() {
+  try {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `fitness-backup-${today()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    backupSt('<span class="sync-ok">✅ 백업 파일을 저장했어요</span>');
+  } catch (e) { backupSt('<span class="sync-err">저장 실패 — 클립보드 복사를 사용해주세요</span>'); }
+}
+function copyJson() {
+  navigator.clipboard.writeText(JSON.stringify(state)).then(
+    () => backupSt('<span class="sync-ok">✅ 백업 JSON을 복사했어요 (메모 앱 등에 붙여넣어 보관)</span>'),
+    () => backupSt('<span class="sync-err">복사 실패 — 파일 저장을 사용해주세요</span>'));
+}
+function importJson(input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const obj = JSON.parse(rd.result);
+      if (!obj || typeof obj !== 'object' || !Array.isArray(obj.lifts) || !Array.isArray(obj.wods)) throw new Error('format');
+      if (!confirm('현재 기록을 이 백업으로 덮어씁니다. 계속할까요?')) { input.value = ''; return; }
+      state = normalize(obj);
+      save(); renderAll(); updateStats(); setTimeout(drawAllCharts, 50);
+      backupSt('<span class="sync-ok">✅ 복원 완료</span>');
+    } catch (e) { backupSt('<span class="sync-err">올바른 백업 파일이 아니에요</span>'); }
+    input.value = '';
+  };
+  rd.readAsText(f);
 }
 
-function renderAll(){renderTodayLifts();renderPRList();renderWodHistory();}
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;white-space:nowrap;max-width:90vw;text-align:center';
+  t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+/* ============================================================
+   초기화
+   ============================================================ */
+function renderAll() {
+  renderToday(); renderTodayLifts(); renderPRList(); renderWodHistory(); renderSymHistory();
+}
+loadState();
+document.getElementById('headerDate').textContent = todayKo();
+buildSymRegions();
+document.getElementById('symDate').value = today();
+loadSymptomForm(today());
+document.getElementById('wodName').addEventListener('input', updateWodWarn);
+document.getElementById('wodMemo').addEventListener('input', updateWodWarn);
+addSetRow();
+renderAll();
+if (migratedNotice) showToast('기존 기록을 kg으로 변환했어요 (lbs×0.4536)');
 </script>
 </body>
 </html>
